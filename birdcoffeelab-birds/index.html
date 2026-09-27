@@ -165,7 +165,7 @@ function drawBird(o) {
     put('rest');
     put('wedge', o.sWedge !== 1 && (() => flipWedge(o.kind, o.sWedge)));
   };
-  if (o.shadow) { ctx.globalAlpha = o.alpha * o.shadow.al; base(o.shadow.dx, o.shadow.dy); parts(true); }
+  if (o.shadow && o.shadow.al > 0) { ctx.globalAlpha = o.alpha * o.shadow.al; base(o.shadow.dx, o.shadow.dy); parts(true); }
   ctx.globalAlpha = o.alpha; base(0, 0); parts(false);
 }
 
@@ -347,7 +347,9 @@ function lidStep(dt) {
     f.sx = scale * sx; f.sy = scale;
     f.bob = -Math.sin(f.phase) * f.bobA * r;
     const d = (2 + 26 * lift) * scale;
-    f.shadow.dx = d * .35; f.shadow.dy = d; f.shadow.al = .38 - .18 * lift;
+    // 그림자는 뚜껑에서 떨어져 나오는 신호로만 쓴다: 나타날 때 생기고, 날아오르면 0.9초 안에 사라진다(하늘엔 떨어질 바닥이 없다)
+    const fade = 1 - Math.min(1, tf / 0.9);
+    f.shadow.dx = d * .35; f.shadow.dy = d; f.shadow.al = (.38 - .18 * lift) * fade;
     const sz = f.size * scale, hxS = f.x + f.ox * f.size, hyS = f.y + f.oy * f.size;
     if (hxS + sz < -20 || hxS - sz > W + 20 || hyS + sz < -20) fliers.splice(i, 1);
   }
